@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arrow Puzzle</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #101827;
+  color: white;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.game { width: 100%; max-width: 390px; text-align: center; }
+h1 { color: #60a5fa; font-size: 32px; }
+.info { display:flex; justify-content:space-around; margin:20px 0; }
+#grid {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  background:#263449;
+  padding:10px;
+  border-radius:16px;
+}
+.cell {
+  aspect-ratio:1;
+  background:#34445c;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:32px;
+  font-weight:bold;
+}
+.arrow { background:#2563eb; cursor:pointer; }
+.arrow:active { transform:scale(.94); }
+button {
+  margin:8px;
+  padding:12px 20px;
+  border:0;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+}
+#message { min-height:28px; margin:15px; }
+</style>
+</head>
+<body>
+<div class="game">
+<h1>➤ ARROW PUZZLE</h1>
+<p>Elimină toate săgețile!</p>
+<div class="info">
+  <span>Nivel: <b id="level">1</b></span>
+  <span>Mutări: <b id="moves">0</b></span>
+  <span>Rămase: <b id="remaining">4</b></span>
+</div>
+<div id="grid"></div>
+<div id="message">Alege o săgeată liberă!</div>
+<button onclick="restart()">↻ Restart</button>
+<button onclick="nextLevel()">Următorul nivel</button>
+</div>
+<script>
+const size=4;
+let level=1,moves=0,arrows=[];
+
+function setup(){
+  moves=0;
+  arrows=[
+    {r:0,c:1,dir:"L",icon:"←"},
+    {r:0,c:2,dir:"U",icon:"↑"},
+    {r:1,c:1,dir:"U",icon:"↑"},
+    {r:2,c:2,dir:"R",icon:"→"}
+  ];
+  render();
+}
+function canMove(a){
+  let r=a.r,c=a.c;
+  let dr={U:-1,D:1,L:0,R:0}[a.dir];
+  let dc={U:0,D:0,L:-1,R:1}[a.dir];
+  while(true){
+    r+=dr;c+=dc;
+    if(r<0||r>=size||c<0||c>=size)return true;
+    if(arrows.some(x=>x.r===r&&x.c===c))return false;
+  }
+}
+function removeArrow(a){
+  if(!canMove(a)){
+    document.getElementById("message").textContent=
+      "Blocată! Încearcă altă săgeată.";
+    return;
+  }
+  arrows=arrows.filter(x=>x!==a);
+  moves++;
+  if(!arrows.length){
+    document.getElementById("message").textContent="🎉 Felicitări! Nivel terminat!";
+  } else {
+    document.getElementById("message").textContent="Bravo! Continuă!";
+  }
+  render();
+}
+function render(){
+  const grid=document.getElementById("grid");
+  grid.innerHTML="";
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      const cell=document.createElement("div");
+      cell.className="cell";
+      const a=arrows.find(x=>x.r===r&&x.c===c);
+      if(a){
+        cell.classList.add("arrow");
+        cell.textContent=a.icon;
+        cell.onclick=()=>removeArrow(a);
+      }
+      grid.appendChild(cell);
+    }
+  }
+  document.getElementById("level").textContent=level;
+  document.getElementById("moves").textContent=moves;
+  document.getElementById("remaining").textContent=arrows.length;
+}
+function restart(){setup();document.getElementById("message").textContent="Nivel repornit!";}
+function nextLevel(){
+  if(arrows.length){document.getElementById("message").textContent="Terminǎ nivelul întâi!";return;}
+  level++;
+  setup();
+  document.getElementById("message").textContent="Nivel nou!";
+}
+setup();
+</script>
+</body>
+</html>
